@@ -16,7 +16,7 @@ startup {
 	vars.ver = "0.0.4";
 	
 	// Log Output switch for DebugView (enables/disables debug messages)
-    var DebugEnabled = true;
+    var DebugEnabled = false;
     Action<string> DebugOutput = (text) => {
         if (DebugEnabled)
         {
