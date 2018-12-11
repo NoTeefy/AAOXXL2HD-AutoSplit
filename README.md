@@ -10,5 +10,6 @@ Auto-Splitter for the game Astérix &amp; Obélix XXL2 - Mission: Las Vegum on P
  
  # Compatibility
  This auto-splitter was successfully tested on the following versions of the game:
+ 
  **v0.41** - Standalone (GOG.com)
  **v0.43** - Steam | Standalone (GOG.com)
