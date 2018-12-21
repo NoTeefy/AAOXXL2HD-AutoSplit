@@ -1,6 +1,6 @@
 /*
 	Astérix & Obélix Auto-Splitter XXL 2 Mission: Las Vegum Remastered (with loadless timer)
-	Version: 0.0.4
+	Version: 0.0.5
 	Author: NoTeefy
 	Compatible Versions: Steam | Standalone DRM-Free (GOG.com)
 	Some code may be inspired by some referenced scripts and their authors: Avasam, DevilSquirrel, tduva, Darkid
@@ -13,7 +13,7 @@ state("oXXL2Game") {
 
 // Loading & func/var declaration
 startup {
-	vars.ver = "0.0.4";
+	vars.ver = "0.0.5";
 	
 	// Log Output switch for DebugView (enables/disables debug messages)
     var DebugEnabled = false;
@@ -34,7 +34,7 @@ startup {
 	
 	/* 
 		We need a deep copy function to reset the levelProgression when a runner exits & stops his timer while keeping the game open for a new run
-		while not touching the values/references from the template itself (gotta love native C base languages...)
+		while not touching the values/references from the template itself (gotta love native C based languages...)
 	*/
 	Func<List<Tuple<int, bool, bool>>, List<Tuple<int, bool, bool>>> deepCopy = (listToCopy) => {
         var newList = new List<Tuple<int, bool, bool>>{};
@@ -53,7 +53,6 @@ startup {
 		vars.started = false;
 		vars.startedVal = false;
 		vars.lastLevel = 0;
-		vars.levelPointerAdress = null;
 		vars.finalBossStaticPointer = null;
 		vars.lastFail = DateTime.Now.Millisecond;
 	};
@@ -78,6 +77,7 @@ startup {
 		tc(11, false, false) // final boss
 	};
 	
+	vars.levelPointerAdress = null;
 	vars.levelProgressionTemplate = levelTuples;
 	vars.lastLevel = null; // is used to keep track of the last occurence from a split
 	vars.levelProgression = vars.deepCopy(levelTuples);
@@ -148,7 +148,7 @@ update {
 		if(game.Handle != null) {
 			if((int)game.Handle > 0) {
 				vars.initialized = true;
-				Thread.Sleep(3000); // wait 3 secs because the handle gets destroyed when the windows opens
+				Thread.Sleep(3000); // wait 3 secs because the handle gets destroyed when the window opens
 			}
 		}
 	}
@@ -156,7 +156,7 @@ update {
 
 // Only runs when the timer is stopped
 start {
-	if(vars.levelState.Current > 0 && vars.isLoading.Current == 1 && !vars.started) {
+	if(vars.levelState.Current > 0 && vars.levelState.Current != vars.lastLevel && vars.isLoading.Current == 1 && !vars.started) {
 		if(settings["startOnlyNewFile"] && vars.levelState.Current != 1) {
 			return false;
 		}
@@ -225,10 +225,13 @@ split {
 					if (ptr == IntPtr.Zero) {
 						ptr = scanner.Scan(vars.finalBossHitCountST);
 					} else {
+						vars.DebugOutput("sig scan found finalBossPointerAddress at " + ptr.ToString("X"));
 						IntPtr finalBaseAddressPtr = new IntPtr(ptr.ToInt64());
 						IntPtr finalBaseAddressPtr2 = IntPtr.Add(finalBaseAddressPtr, 0x1);
+						vars.DebugOutput("sig scan found finalBossPointerAddress at " + finalBaseAddressPtr2.ToString("X"));
 						int finalBaseAddress = memory.ReadValue<int>((IntPtr)finalBaseAddressPtr2);
 						IntPtr finalPtr = new IntPtr(finalBaseAddress);
+						vars.DebugOutput("sig scan found finalBossPointerAddress at " + finalPtr.ToString("X") + " with module base adress " + ((int)modules.First().BaseAddress).ToString("X"));
 						var finalFileOffset = finalBaseAddress - (int)modules.First().BaseAddress;
 						int[] offsets = new int[] {
 							0x1AC,
@@ -256,13 +259,15 @@ split {
 				}
 			}
 			else {
-				var finalVal = vars.finalBossStaticPointer.DerefBytes(game, 1); // would need an Array.Regverse(fB) because of Big/Little-Endian problems
-				if(vars.finalBossStaticPointer != null && finalVal != null) {
-					// vars.DebugOutput("boss is at finalHits: " + finalVal[0]);
-					if(finalVal[0] == 0) {
-						// boss defeated, doing last split
-						vars.DebugOutput("defeated boss and finalHits: " + finalVal[0]);
-						return true;
+				if(vars.finalBossStaticPointer != null) {
+					var finalVal = vars.finalBossStaticPointer.DerefBytes(game, 1); // would need an Array.Regverse(fB) because of Big/Little-Endian problems
+					if(finalVal != null) {
+						// vars.DebugOutput("boss is at finalHits: " + finalVal[0]);
+						if(finalVal[0] == 0) {
+							// boss defeated, doing last split
+							vars.DebugOutput("defeated boss on finalHits: " + finalVal[0]);
+							return true;
+						}
 					}
 				}
 				// boss not down yet
