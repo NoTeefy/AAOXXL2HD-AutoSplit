@@ -1,5 +1,5 @@
 # AAOXXL2HD-AutoSplit
-Auto-Splitter for the game Astérix &amp; Obélix XXL2 - Mission: Las Vegum on PC
+Auto-Splitter for the game Astérix &amp; Obélix XXL2 - Mission: Las Vegum (Remastered) on PC
 
 # Functions
  - Automated splits for the official route
