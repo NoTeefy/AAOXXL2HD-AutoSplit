@@ -225,13 +225,13 @@ split {
 					if (ptr == IntPtr.Zero) {
 						ptr = scanner.Scan(vars.finalBossHitCountST);
 					} else {
-						vars.DebugOutput("sig scan found finalBossPointerAddress at " + ptr.ToString("X"));
+						vars.DebugOutput("sig scan found first pointer at " + ptr.ToString("X"));
 						IntPtr finalBaseAddressPtr = new IntPtr(ptr.ToInt64());
 						IntPtr finalBaseAddressPtr2 = IntPtr.Add(finalBaseAddressPtr, 0x1);
-						vars.DebugOutput("sig scan found finalBossPointerAddress at " + finalBaseAddressPtr2.ToString("X"));
+						vars.DebugOutput("first pointer with the added offset at " + finalBaseAddressPtr2.ToString("X"));
 						int finalBaseAddress = memory.ReadValue<int>((IntPtr)finalBaseAddressPtr2);
 						IntPtr finalPtr = new IntPtr(finalBaseAddress);
-						vars.DebugOutput("sig scan found finalBossPointerAddress at " + finalPtr.ToString("X") + " with module base adress " + ((int)modules.First().BaseAddress).ToString("X"));
+						vars.DebugOutput("second pointer at " + finalPtr.ToString("X") + " with module base adress " + ((int)modules.First().BaseAddress).ToString("X"));
 						var finalFileOffset = finalBaseAddress - (int)modules.First().BaseAddress;
 						int[] offsets = new int[] {
 							0x1AC,
@@ -242,7 +242,7 @@ split {
 						var fB = dP.DerefBytes(game, 1); // would need an Array.Regverse(fB) because of Big/Little-Endian problems
 						IntPtr resolvedPtr = new IntPtr();
 						dP.DerefOffsets(game, out resolvedPtr);
-						vars.DebugOutput("sig scan found finalBossPointerAddress at " + resolvedPtr.ToString("X"));
+						vars.DebugOutput("found finalBossPointerAddress at " + resolvedPtr.ToString("X"));
 						if(fB != null && dP != null) {
 							if(fB[0] == 3) {
 								vars.finalBossStaticPointer = dP;
